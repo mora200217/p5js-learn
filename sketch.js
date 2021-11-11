@@ -1,81 +1,117 @@
 
-const W = innerWidth; 
-const H = innerHeight; 
 
-let pos; 
-let vel; 
-let ace; 
-let t = 0; 
-let posA; 
-let r; 
-let v; 
-let a; 
 
-let factor = 1; 
+let ball; 
+const SEP_PLAYER = 10; 
+const W_PLAYER = 14; 
+const H_PLAYER = 120; 
+
+let player1; 
+let player2; 
 
 function setup(){
-    
-    createCanvas(W, H); 
-    background(0); 
- 
-    posA = createVector(200,400); 
+    noStroke(); 
+    createCanvas(innerWidth, innerHeight); 
 
-    r = createVector(W/2, H/2); 
-    v = createVector(3, -5); 
-    a = createVector(0, -0.1); 
+    ball = new Ball(20, innerWidth / 2, innerHeight / 2); // RAD, POSX, POSY 
+    ball2 = new Ball(20, 200, 100); 
+    player1 = new Player(1); 
+    player2 = new Player(2); 
+
+    frameRate(60); // FPS Frames per second  
 }
-// Sumar velocidad a la posicion en cada instante 
-// Cambiando la posicion en cada segundo o instante 
-
-
-
-
 
 function draw(){
+    background(0);
 
-    /*
-    background(0); 
-    // Capitulo I : Puntos y lineas. 
-    fill(0, 255, 0); // verde
-    circle(posA.x, posA.y ,10); 
+    ball.appear(); 
+    ball.update(); 
 
-    fill(255, 0, 0);  // Rojo
-    circle(300, 100 ,10); 
+    ball2.appear(); 
+    ball2.update(); 
 
-    // line([x1, y1], [x2, y2]); 
-    stroke(255); 
-    line(posA.x, posA.y, 300, 100); 
+    // Decoraction 
+    drawLine(); 
 
-    posA.set(mouseX, mouseY); // Set -> Act u
-
-    // Suma 
-    suma(); 
-
-    */ 
-
-    //CAIDA LIBRE 
-
-    // elemneto 
-    circle(r.x, r.y, 10); 
-
-    r.add(v); 
-    v.add(a); 
-// 50 100 150 200 250
-    if (t % 200 == 0){
-        
-        console.log(a); 
-    } 
-    a.set(0, 2 * sin(0.2 * t))
-    console.log(t); 
+    // Players 
+    player1.appear(); 
+    player2.appear(); 
     
-    t++; 
+
+    
+
+    console.log(random(1, 4));  // [1, 4)
 }
 
-function suma(){
-    let a = createVector(1, 2); 
-    let b = createVector(3, 1); 
 
-    let c = a.copy().add(b); // a = (4, 3), c = (4, 3)
+function drawLine(){
+    rectMode(CENTER); // mandar al centro
+    const rectHeight = 10; 
+    const sep = rectHeight * .5; 
+    for(let y = 0; y < innerHeight; y += rectHeight + sep){
+        rect(innerWidth / 2, y, 5, rectHeight); // x, y, w, h
+    }
 
-    console.log( c)
+}
+
+// Pelota 
+
+const MIN_VEL = 4; 
+const MAX_VEL = 6; 
+
+
+
+
+class Player{
+    constructor(type){
+        this.type = type ; // 1 - 2 
+        this.pts = 0;
+        this.y = innerHeight / 3; 
+
+        if (type == 1){
+            this.x = SEP_PLAYER; 
+        }else if (type == 2){
+            this.x = innerWidth - SEP_PLAYER  - W_PLAYER; 
+        }
+    }
+
+    appear(){
+        rectMode(CORNER); 
+        rect(this.x, this.y,  W_PLAYER, H_PLAYER); 
+    }
+    
+}
+class Ball{
+    constructor(RAD, x, y){
+        // Parametros 
+        this.RAD = RAD; 
+        this.pos = createVector(x, y); 
+        this.vel = createVector( pow(-1, round(random(1, 100))) * random(MIN_VEL, MAX_VEL), pow(-1, round(random(1, 100))) *  random(MIN_VEL, MAX_VEL)); 
+        //this.vel = createVector(0,-0.10); 
+        //this.ace = createVector(0, 0.981)
+    }
+
+    /*
+        Este método se encarga 
+        de dibujar la pelota. Solamente 
+        dibujarla. 
+    */ 
+    appear(){
+        fill(255); // Color blanco 
+        circle(this.pos.x, this.pos.y, 2 * this.RAD); // Dibujo mi Pelota
+    }
+
+    update(){
+        this.pos.add(this.vel); 
+        // this.vel.add(this.ace); 
+        let coef = 1; 
+        if (this.pos.y + this.RAD > innerHeight || this.pos.y - this.RAD < 0){
+          
+            this.vel.mult(createVector(coef, -coef))
+        }
+
+        if (this.pos.x + this.RAD > innerWidth || this.pos.x - this.RAD < 0){
+            this.vel.mult(createVector(-coef, coef))
+        }
+    }
 }
